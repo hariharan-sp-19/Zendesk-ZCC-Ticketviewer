@@ -17,10 +17,11 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit  {
-
+  ticketId : any;
   cred : Cred = new Cred();
   tickets : Ticket[] = [];
   allUsers : Users[] = [];
+  scrollableTabs : any[] = [];
   userIdVsName : any = {};
   allTickets : Ticket[] = [];
   totalRecords : number = 0;
@@ -33,6 +34,7 @@ export class AppComponent implements OnInit  {
   fetched : boolean = false;
   displayTicketDetail : boolean = false;
   detailViewTicket : Ticket[] = [];
+  activeTabIndex : number = 0;
   ngOnInit() {
     this.initCache();
     this.statusOptions = [
@@ -52,6 +54,9 @@ export class AppComponent implements OnInit  {
       { name : "High", value : "high"},
       { name : "Urgent", value : "urgent"},
     ]
+    this.cred.domain = "https://zccgmustudent.zendesk.com";
+    this.cred.username = "ranahari.sp@gmail.com";
+    this.cred.password = "Password@#";
   }
   constructor(
     public commonService : CommonService,
@@ -175,15 +180,28 @@ export class AppComponent implements OnInit  {
   }
 
   onRowSelect(event : any) {
-    this.commonService.fetchData(this.cred.domain,this.cred.username,this.cred.password, "fetchTicketComments", 1, this.selectedTicket.id)
-      .subscribe(resp => {
-        if(resp){
-          this.selectedTicketComments = resp.body;
-          this.detailViewTicket[0] = this.selectedTicket;
-          console.log(this.selectedTicketComments);
-          this.displayTicketDetail = true;
-        }
-    });
+    this.loading = true;
+    let index = this.scrollableTabs.findIndex((tab,i) => { return this.selectedTicket.id == tab.id} );
+    if(index != -1){
+      this.activeTabIndex = index+1;
+      this.loading = false;
+      this.selectedTicket = null;
+    } else {
+      this.commonService.fetchData(this.cred.domain,this.cred.username,this.cred.password, "fetchTicketComments", 1, this.selectedTicket.id)
+        .subscribe(resp => {
+          if(resp){
+            this.selectedTicketComments = resp.body;
+            this.detailViewTicket[0] = this.selectedTicket;
+            this.displayTicketDetail = true;
+            this.scrollableTabs.push({"ticket" : this.detailViewTicket, "comments" : this.selectedTicketComments.comments, title : "#"+this.selectedTicket.id, id : this.selectedTicket.id});
+            setTimeout(()=>{
+              this.activeTabIndex = this.scrollableTabs.length;
+              this.loading = false;
+            },600);
+            this.selectedTicket = null;
+          }
+      });
+    }
   }
 
   getTicketHeader(){
@@ -224,5 +242,19 @@ export class AppComponent implements OnInit  {
 
         return (event.order * result);
     });
-}
+  }
+
+  handleTabClose(event : any){
+    this.scrollableTabs.splice(event.index-1, 1);
+    this.activeTabIndex = this.scrollableTabs.length;
+  }
+
+  handleTabChange(e : any) {
+    this.activeTabIndex = e.index;
+  }
+
+  fetchSingleTicket(ticketId : number) {
+
+  }
+
 }

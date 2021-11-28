@@ -12,36 +12,8 @@
 </p-menubar>
 
 <!-- Main Ticket Table -->
-<div style="padding: 30px;">
-  <div *ngIf="fetched">
-    <p-table [value]="tickets" dataKey="id" [lazy]="true" [scrollable]="true" scrollHeight="580px" (onLazyLoad)="loadTickets($event)"
-    [paginator]="true" [rows]="25" [totalRecords]="totalRecords" [loading]="loading" selectionMode="single" [(selection)]="selectedTicket" (onRowSelect)="onRowSelect($event)" 
-    [globalFilterFields]="['id','created_at']">
-    <ng-template pTemplate="header" >
-        <tr>
-            <th style="max-width:80px" pSortableColumn="id">Id</th>
-            <th style="max-width:100px">Status</th>
-            <th>Subject</th>
-            <th style="max-width:200px">Requester</th>
-            <th style="max-width:150px" pSortableColumn="created_at">Requested</th>
-            <th style="max-width:100px">Type</th>
-            <th style="max-width:100px">Priority</th>
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-ticket>
-        <tr [pSelectableRow]="ticket">
-            <td style="max-width:80px">{{ticket.id}}</td>
-            <td style="max-width:100px;font-weight: bold;text-transform: uppercase;" [ngClass]="{'red': ticket.status == 'open', 'green': ticket.status == 'solved', 'blue': ticket.status == 'pending'}">{{ticket.status}}</td>
-            <td>{{ticket.subject}}</td>
-            <td style="max-width:200px">{{this.userIdVsName[ticket.requester_id]}}</td>
-            <td style="max-width:150px" pTooltip="{{formatDate(ticket.created_at,'medium')}}" tooltipPosition="top">{{formatDate(ticket.created_at)}}</td>
-            <td style="max-width:100px;font-weight: bold;text-transform: uppercase;">{{ticket.type}}</td>
-            <td style="max-width:100px;font-weight: bold;text-transform: uppercase;" [ngClass]="{'red': ticket.priority == 'urgent','orange' : ticket.priority == 'high', 'blue': ticket.priority == 'normal', 'green': ticket.priority == 'low'}">{{ticket.priority}}</td>
-        </tr>
-    </ng-template>
-    </p-table>
-  </div>
-  <div *ngIf="!fetched">
+<div style="padding: 30px;" *ngIf="!fetched">
+  <div>
     <p-panel header="Welcome">
         <ul>
             <li>Zendesk Ticket Viewer is an application developed as a part of Zendesk Internship Coding Assessment.</li>
@@ -59,48 +31,81 @@
 <!-- Just a confirmation dialog -->
 <p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
 
-<!-- Dialog for Individual Ticket View -->
-<p-dialog header="{{getTicketHeader()}}" [(visible)]="displayTicketDetail" (onHide)="selectedTicket=null;">
-    <p-scrollPanel [style]="{width: '800px', height: '800px'}">
-        <p-table [value]="detailViewTicket" responsiveLayout="scroll">
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>Submitted</th>
-                    <th>Requester</th>
-                    <th>Status</th>
-                    <th>Type</th>
-                    <th>Priority</th>
-                    <th>Assignee</th>
-                    <th>Channel</th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-ticket>
-                <tr>
-                    <td>{{formatDate(ticket.created_at,'medium')}}</td>
-                    <td>{{userIdVsName[ticket.requester_id]}}</td>
-                    <td style="font-weight: bold;text-transform: uppercase;" [ngClass]="{'red': ticket.status == 'open', 'green': ticket.status == 'solved', 'blue': ticket.status == 'pending'}">{{ticket.status}}</td>
-                    <td style="font-weight: bold;text-transform: uppercase;">{{ticket.type}}</td>
-                    <td style="font-weight: bold;text-transform: uppercase;" [ngClass]="{'red': ticket.priority == 'urgent','orange' : ticket.priority == 'high', 'blue': ticket.priority == 'normal', 'green': ticket.priority == 'low'}">{{ticket.priority}}</td>
-                    <td>{{userIdVsName[ticket.assignee_id]}}</td>
-                    <td>{{ticket.via.channel}}</td>
-                </tr>
-            </ng-template>
-        </p-table>
-        <div style="padding-top: 10px;"></div>
-        <div *ngFor="let comment of selectedTicketComments.comments">
-            <div>
-                <span style="font-weight: bold;">{{userIdVsName[comment.author_id]}}</span>
-                <span style="font-size: small;color: gray;">  {{formatDate(comment.created_at,'medium')}}</span>
-                <br>
-                <br>
-                <span style="white-space: pre-line;">{{comment.body}}</span>
-                <div style="padding:10px;">
-                    <span *ngFor="let attachment of comment.attachments" style="padding:5px;">
-                        <p-image src="{{attachment.content_url}}" alt="Image" width="50" height="50" [preview]="true"></p-image>
-                    </span>
+<div class="p-grid" *ngIf="fetched">
+    <p-tabView [scrollable]="true" [(activeIndex)]="activeTabIndex" (onClose)="handleTabClose($event)" (onChange)="handleTabChange($event)">
+        <p-tabPanel header="Ticket List" [selected]="true">
+            <div *ngIf="fetched">
+                <p-table [value]="tickets" dataKey="id" [lazy]="true" [scrollable]="true" scrollHeight="520px" (onLazyLoad)="loadTickets($event)"
+                [paginator]="true" [rows]="25" [totalRecords]="totalRecords" [loading]="loading" selectionMode="single" [(selection)]="selectedTicket" (onRowSelect)="onRowSelect($event)" 
+                [globalFilterFields]="['id','created_at']">
+                <ng-template pTemplate="header" >
+                    <tr>
+                        <th style="max-width:80px" pSortableColumn="id">Id</th>
+                        <th style="max-width:100px">Status</th>
+                        <th>Subject</th>
+                        <th style="max-width:200px">Requester</th>
+                        <th style="max-width:150px" pSortableColumn="created_at">Requested</th>
+                        <th style="max-width:100px">Type</th>
+                        <th style="max-width:100px">Priority</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-ticket>
+                    <tr [pSelectableRow]="ticket">
+                        <td style="max-width:80px">{{ticket.id}}</td>
+                        <td style="max-width:100px;font-weight: bold;text-transform: uppercase;" [ngClass]="{'red': ticket.status == 'open', 'green': ticket.status == 'solved', 'blue': ticket.status == 'pending'}">{{ticket.status}}</td>
+                        <td>{{ticket.subject}}</td>
+                        <td style="max-width:200px">{{this.userIdVsName[ticket.requester_id]}}</td>
+                        <td style="max-width:150px" pTooltip="{{formatDate(ticket.created_at,'medium')}}" tooltipPosition="top">{{formatDate(ticket.created_at)}}</td>
+                        <td style="max-width:100px;font-weight: bold;text-transform: uppercase;">{{ticket.type}}</td>
+                        <td style="max-width:100px;font-weight: bold;text-transform: uppercase;" [ngClass]="{'red': ticket.priority == 'urgent','orange' : ticket.priority == 'high', 'blue': ticket.priority == 'normal', 'green': ticket.priority == 'low'}">{{ticket.priority}}</td>
+                    </tr>
+                </ng-template>
+                </p-table>
+              </div>
+        </p-tabPanel>
+        <p-tabPanel *ngFor="let tab of scrollableTabs;let i = index" leftIcon="pi pi-copy" [header]="tab.title" [closable]="true">
+            <p-scrollPanel>
+                <p-table [value]="tab.ticket" responsiveLayout="scroll">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Submitted</th>
+                            <th>Requester</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Priority</th>
+                            <th>Assignee</th>
+                            <th>Channel</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-ticket>
+                        <tr>
+                            <td>{{formatDate(ticket.created_at,'medium')}}</td>
+                            <td>{{userIdVsName[ticket.requester_id]}}</td>
+                            <td style="font-weight: bold;text-transform: uppercase;" [ngClass]="{'red': ticket.status == 'open', 'green': ticket.status == 'solved', 'blue': ticket.status == 'pending'}">{{ticket.status}}</td>
+                            <td style="font-weight: bold;text-transform: uppercase;">{{ticket.type}}</td>
+                            <td style="font-weight: bold;text-transform: uppercase;" [ngClass]="{'red': ticket.priority == 'urgent','orange' : ticket.priority == 'high', 'blue': ticket.priority == 'normal', 'green': ticket.priority == 'low'}">{{ticket.priority}}</td>
+                            <td>{{userIdVsName[ticket.assignee_id]}}</td>
+                            <td>{{ticket.via.channel}}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+                <div style="padding-top: 10px;"></div>
+                <div *ngFor="let comment of tab.comments">
+                    <div>
+                        <span style="font-weight: bold;">{{userIdVsName[comment.author_id]}}</span>
+                        <span style="font-size: small;color: gray;">  {{formatDate(comment.created_at,'medium')}}</span>
+                        <br>
+                        <br>
+                        <span style="white-space: pre-line;">{{comment.body}}</span>
+                        <div style="padding:10px;">
+                            <span *ngFor="let attachment of comment.attachments" style="padding:10px">
+                                <p-image src="{{attachment.content_url}}" alt="Image" width="50" height="50" [preview]="true"></p-image>
+                            </span>
+                        </div>
+                    </div>
+                    <p-divider></p-divider>
                 </div>
-            </div>
-            <p-divider></p-divider>
-        </div>
-    </p-scrollPanel>
-</p-dialog>
+            </p-scrollPanel>
+        </p-tabPanel>
+    </p-tabView>
+</div>

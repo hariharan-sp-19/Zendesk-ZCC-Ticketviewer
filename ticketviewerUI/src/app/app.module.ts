@@ -51,7 +51,7 @@ import { ImageModule } from 'primeng/image';
     DividerModule,
     CommonModule,
     TooltipModule,
-    ImageModule
+    ImageModule,
   ],
   providers: [
     ConfirmationService,
