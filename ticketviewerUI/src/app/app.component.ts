@@ -34,6 +34,7 @@ export class AppComponent implements OnInit  {
   fetched : boolean = false;
   displayTicketDetail : boolean = false;
   detailViewTicket : Ticket[] = [];
+  searchTicketId : any;
   activeTabIndex : number = 0;
   ngOnInit() {
     this.initCache();
@@ -154,7 +155,7 @@ export class AppComponent implements OnInit  {
       });
     } else {
       this.confirmationService.confirm({
-        message: 'Are you sure that you want update credential? This will clear all existing data',
+        message: 'Are you sure that you want to Logout ?',
         accept: () => {
           this.fetched = false;
           this.initCache();
@@ -246,15 +247,27 @@ export class AppComponent implements OnInit  {
 
   handleTabClose(event : any){
     this.scrollableTabs.splice(event.index-1, 1);
-    this.activeTabIndex = this.scrollableTabs.length;
+    this.activeTabIndex = 0;
   }
 
   handleTabChange(e : any) {
     this.activeTabIndex = e.index;
   }
 
-  fetchSingleTicket(ticketId : number) {
-
+  searchAndDisplayTicket() {
+    let selectedTicket = this.allTickets.find(ticket => { return ticket.id == this.searchTicketId});
+    if(selectedTicket != null){
+      this.selectedTicket = selectedTicket;
+      this.onRowSelect(null);
+    } else {
+      this.commonService.fetchData(this.cred.domain,this.cred.username,this.cred.password, "fetchTicketById", 1, this.searchTicketId)
+        .subscribe(resp => {
+          if(resp){
+            this.selectedTicket = resp.body.ticket;
+            this.onRowSelect(null);
+          }
+        });
+    }
+    this.searchTicketId = null;
   }
-
 }

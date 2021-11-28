@@ -4,10 +4,19 @@
       <img src="assets/brand.png" height="50" class="p-mr-2">
   </ng-template>
   <ng-template pTemplate="end">
+    <div *ngIf="!fetched">
       <input type="text" size="40" pInputText class="p-inputtext-sm marginLeft" [disabled]="fetched" placeholder="Zendesk Domain" tooltipPosition="Please enter the domain, the domain pattern looks something like this https://{subdomain}.zendesk.com" [(ngModel)]="cred.domain">
       <input type="text" size="25" pInputText class="p-inputtext-sm marginLeft" [disabled]="fetched" placeholder="Username" [(ngModel)]="cred.username">
       <input type="password" size="25" pInputText class="p-inputtext-sm margin" [disabled]="fetched" placeholder="Password" [(ngModel)]="cred.password">
-      <button pButton type="button" icon="{{fetched ? 'pi pi-pencil':'pi pi-file'}}" label="{{fetched ? 'Update Credential':'Fetch Tickets'}}" (click)="fetchAllTickets()"></button>
+      <button pButton type="button" icon="pi pi-sign-in" label="Log In" (click)="fetchAllTickets()"></button>
+    </div>
+    <div *ngIf="fetched">
+        <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input type="text" pInputText class="p-inputtext-sm marginRight" [(ngModel)]="searchTicketId" tooltipPosition="To search a ticket input the ticket Id and press enter" #txtInput (keydown.enter)="searchAndDisplayTicket();txtInput.blur()" placeholder="Search">         
+        </span>
+        <button pButton pRipple type="button" icon="pi pi-sign-out" class="p-button-rounded" (click)="fetchAllTickets()"></button>
+    </div>
   </ng-template>
 </p-menubar>
 
