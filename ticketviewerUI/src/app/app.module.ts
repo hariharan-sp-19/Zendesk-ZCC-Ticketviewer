@@ -9,7 +9,7 @@ import { TabViewModule } from 'primeng/tabview';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -56,7 +56,8 @@ import { ImageModule } from 'primeng/image';
   providers: [
     ConfirmationService,
     MessageService,
-    DatePipe
+    DatePipe,
+    HttpClient
   ],
   bootstrap: [AppComponent]
 })

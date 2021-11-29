@@ -178,7 +178,7 @@ export class AppComponent implements OnInit  {
     return true;
   }
 
-  validateDomain(domain : string) {
+  validateDomain(domain : string): boolean {
     return /^((https:\/\/){1})[a-zA-Z0-9\-\.]{3,}\.((zendesk){1})\.((com){1})?$/.test(domain);
   }
 

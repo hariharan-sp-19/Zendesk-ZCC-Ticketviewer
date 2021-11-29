@@ -14,9 +14,9 @@ The application is developed using ExpressJS (NodeJS) backend and AngularJS fron
 
 To setup the application follow the below setups
 
-* Uncompress the downloaded project at your desired location and run the cmd ```npm install```
+* Uncompress the downloaded project at your desired location and open the application folder in your terminal and run the cmd ```npm install```
   This will install the required node_modules of ExpressJS backend app
-* Go to ticketviewerUI folder and run the cmd ```npm install```
+* Go to ticketviewerUI folder in your terminal and run the cmd ```npm install```
   This will install the required node_modules of AngularJS frontend app
  
 The application can you be ran in two different modes ( dev | prod )
@@ -37,4 +37,6 @@ To run backend Unit Testing
 * Goto the main application folder in your terminal window and run the cmd  ```npm test```
   >NOTE : make sure to update the credentials in the cred.json file under test folder before running the npm test)
         
-        
+To run frontend Unit Testing
+* Goto the ticketviewerUI folder in your terminal window and run the cmd ```ng test```
+
