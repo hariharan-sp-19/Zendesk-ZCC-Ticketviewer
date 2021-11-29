@@ -36,6 +36,7 @@ export class AppComponent implements OnInit  {
   detailViewTicket : Ticket[] = [];
   searchTicketId : any;
   activeTabIndex : number = 0;
+  paginationIdVsIndex : any = {};
   ngOnInit() {
     this.initCache();
     this.statusOptions = [
@@ -68,17 +69,21 @@ export class AppComponent implements OnInit  {
 
   loadTickets(event: LazyLoadEvent){
     let firstIndex = event.first != undefined ? event.first : 0;
-    if(this.allTickets.length > firstIndex){
-      this.tickets = this.allTickets.slice(firstIndex,firstIndex+25);
+    if(this.paginationIdVsIndex.hasOwnProperty(firstIndex+1)){
+      let startIndex = this.paginationIdVsIndex[firstIndex+1];
+      this.tickets = this.allTickets.slice(startIndex,startIndex+25);
     } else {
       this.loading = true;
-      this.commonService.fetchData(this.cred.domain,this.cred.username,this.cred.password, "fetchTicketByPage", Math.floor((firstIndex+25)/100)+1)
+      let pageNumber = (firstIndex+25)%100 == 0 ? Math.floor((firstIndex+25)/100) : (Math.floor((firstIndex+25)/100) + 1);
+      this.commonService.fetchData(this.cred.domain,this.cred.username,this.cred.password, "fetchTicketByPage", pageNumber)
       .subscribe(resp => {
         if(resp){
           if(resp["statusCode"] == 200){
             this.allTickets = this.allTickets.concat(resp.body['tickets']);
             this.sortAllTickets();
-            this.tickets = this.allTickets.slice(firstIndex,firstIndex+25);
+            this.prepareIdVsIndexForPagination();
+            let startIndex = this.paginationIdVsIndex[firstIndex+1];
+            this.tickets = this.allTickets.slice(startIndex,startIndex+25);
             this.fetched = true;
             this.prepareUserIdsVsName();
           } else {
@@ -102,6 +107,15 @@ export class AppComponent implements OnInit  {
     });
   }
 
+  prepareIdVsIndexForPagination(){
+    this.paginationIdVsIndex = {};
+    for(let i=0;i<this.allTickets.length;i=i+25){
+      let ticket = this.allTickets[i];
+      this.paginationIdVsIndex[ticket.id+""] = i; 
+    }
+    
+  }
+
   fetchAllTickets(){
     if(!this.fetched){
       if(!this.validateInput()){
@@ -115,6 +129,7 @@ export class AppComponent implements OnInit  {
             this.allTickets = resp.body['tickets'];
             this.tickets = this.allTickets.slice(0,25);
             this.prepareUserIdsVsName();
+            this.prepareIdVsIndexForPagination();
           } else {
             this.messageService.add({severity:'error', summary: 'Error', detail: resp.body['error'].title != undefined ?  resp.body['error'].title : resp.body['error']});
           }
