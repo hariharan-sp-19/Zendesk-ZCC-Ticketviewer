@@ -247,7 +247,10 @@ export class AppComponent implements OnInit  {
 
   handleTabClose(event : any){
     this.scrollableTabs.splice(event.index-1, 1);
-    this.activeTabIndex = 0;
+    setTimeout(()=>{
+      this.activeTabIndex = this.activeTabIndex-1;
+    },150);
+    
   }
 
   handleTabChange(e : any) {
