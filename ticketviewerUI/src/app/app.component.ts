@@ -247,8 +247,12 @@ export class AppComponent implements OnInit  {
       this.commonService.fetchData(this.cred.domain,this.cred.username,this.cred.password, "fetchTicketById", 1, this.searchTicketId)
         .subscribe(resp => {
           if(resp){
-            this.selectedTicket = resp.body.ticket;
-            this.onRowSelect(null);
+            if(resp["statusCode"] == 200){
+              this.selectedTicket = resp.body.ticket;
+              this.onRowSelect(null);
+            } else {
+              this.messageService.add({severity:'error', summary: 'Error', detail: resp.body['error'].title != undefined ?  resp.body['error'].title : resp.body['error']});
+            }
           }
         });
     }
