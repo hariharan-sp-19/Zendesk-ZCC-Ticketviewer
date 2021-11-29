@@ -56,9 +56,6 @@ export class AppComponent implements OnInit  {
       { name : "High", value : "high"},
       { name : "Urgent", value : "urgent"},
     ]
-    this.cred.domain = "https://zccgmustudent.zendesk.com";
-    this.cred.username = "ranahari.sp@gmail.com";
-    this.cred.password = "Password@#";
   }
   constructor(
     public commonService : CommonService,
@@ -227,27 +224,6 @@ export class AppComponent implements OnInit  {
     this.tickets = [];
     this.cred = new Cred();
     this.loading = false;
-  }
-
-  customSort(event: any) {
-    event.data.sort((data1 : any, data2 : any) => {
-        let value1 = data1[event.field];
-        let value2 = data2[event.field];
-        let result = null;
-
-        if (value1 == null && value2 != null)
-            result = -1;
-        else if (value1 != null && value2 == null)
-            result = 1;
-        else if (value1 == null && value2 == null)
-            result = 0;
-        else if (typeof value1 === 'string' && typeof value2 === 'string')
-            result = value1.localeCompare(value2);
-        else
-            result = (value1 < value2) ? -1 : (value1 > value2) ? 1 : 0;
-
-        return (event.order * result);
-    });
   }
 
   handleTabClose(event : any){
