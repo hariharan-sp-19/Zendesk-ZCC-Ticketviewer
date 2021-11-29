@@ -77,36 +77,10 @@ export class AppComponent implements OnInit  {
         if(resp){
           if(resp["statusCode"] == 200){
             this.allTickets = this.allTickets.concat(resp.body['tickets']);
-            this.allTickets.sort((a,b) => {
-              if(a.id > b.id){
-                return 1;
-              } else if (a.id < b.id) {
-                return -1;
-              } else {
-                return 0;
-              }
-            });
+            this.sortAllTickets();
             this.tickets = this.allTickets.slice(firstIndex,firstIndex+25);
             this.fetched = true;
-            let requesterIds: Number[]  = [];
-            this.allTickets.map((obj) => {
-              requesterIds.push(obj.requester_id);
-              requesterIds.push(obj.assignee_id);
-            });
-            requesterIds = [...new Set(requesterIds)];
-            console.log(requesterIds);
-            this.fetched = true;
-            this.loading = true;
-            this.commonService.fetchData(this.cred.domain,this.cred.username,this.cred.password, "fetchAllUsers", 1, requesterIds.join(","))
-            .subscribe(resp => {
-                if(resp){
-                  this.allUsers = this.allUsers.concat(resp.body["users"]);
-                  this.allUsers.forEach(obj => {
-                    this.userIdVsName[obj.id] = obj.name;
-                  });
-                }
-                this.loading = false;
-              });
+            this.prepareUserIdsVsName();
           } else {
             this.messageService.add({severity:'error', summary: 'Error', detail: resp.body['error'].title != undefined ?  resp.body['error'].title : resp.body['error']});
           }
@@ -114,6 +88,18 @@ export class AppComponent implements OnInit  {
         }
       });
     }
+  }
+
+  sortAllTickets(){
+    this.allTickets.sort((a,b) => {
+      if(a.id > b.id){
+        return 1;
+      } else if (a.id < b.id) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
   }
 
   fetchAllTickets(){
@@ -125,29 +111,10 @@ export class AppComponent implements OnInit  {
       .subscribe(resp => {
         if(resp){
           if(resp["statusCode"] == 200){
-            console.log(resp.body);
             this.totalRecords = resp.body["count"];
             this.allTickets = resp.body['tickets'];
             this.tickets = this.allTickets.slice(0,25);
-            // this.loading = true;
-            let requesterIds: Number[]  = [];
-            this.allTickets.map((obj) => {
-              requesterIds.push(obj.requester_id);
-              requesterIds.push(obj.assignee_id);
-            });
-            requesterIds = [...new Set(requesterIds)];
-            this.fetched = true;
-            this.loading = true;
-            this.commonService.fetchData(this.cred.domain,this.cred.username,this.cred.password, "fetchAllUsers", 1, requesterIds.join(","))
-            .subscribe(resp => {
-                if(resp){
-                  this.allUsers = this.allUsers.concat(resp.body["users"]);
-                  this.allUsers.forEach(obj => {
-                    this.userIdVsName[obj.id] = obj.name;
-                  });
-                }
-                this.loading = false;
-              });
+            this.prepareUserIdsVsName();
           } else {
             this.messageService.add({severity:'error', summary: 'Error', detail: resp.body['error'].title != undefined ?  resp.body['error'].title : resp.body['error']});
           }
@@ -163,6 +130,29 @@ export class AppComponent implements OnInit  {
     });
     }
   }
+
+  prepareUserIdsVsName(){
+    let userIds: Number[]  = [];
+    this.allTickets.map((obj) => {
+      userIds.push(obj.requester_id);
+      userIds.push(obj.assignee_id);
+    });
+    userIds = [...new Set(userIds)];
+    this.fetched = true;
+    this.loading = true;
+    this.commonService.fetchData(this.cred.domain,this.cred.username,this.cred.password, "fetchAllUsers", 1, userIds.join(","))
+    .subscribe(resp => {
+        if(resp){
+          this.allUsers = this.allUsers.concat(resp.body["users"]);
+          this.allUsers.forEach(obj => {
+            this.userIdVsName[obj.id] = obj.name;
+          });
+        }
+        this.loading = false;
+      });
+    }
+
+           
 
   validateInput(){
     if(this.cred.domain.length == 0 && this.cred.username.length == 0 && this.cred.password.length == 0){
